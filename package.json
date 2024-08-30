@@ -10,7 +10,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "4.18.2",
+    "express": "4.19.2",
     "lodash": "^4.17.21",
     "sharp": "^0.32.1",
     "undici": "6.x"
