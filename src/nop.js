@@ -1,13 +1,12 @@
 "use strict";
 
-const undici = require("undici");
-comst { generateRandomIP, randomUserAgent } = require("./utils.js");
+const utr = require("undici");
+const { generateRandomIP, randomUserAgent } = require("./uuu.js");
 const pick = require("lodash").pick;
-const shouldCompress = require("./shouldCompress");
-const redirect = require("./redirect");
-const compress = require("./compress");
-const copyHeaders = require("./copyHeaders");
-const DEFAULT_QUALITY = 40;
+const sc = require("./scomp.js");
+const rd = require("./rrd.js");
+const c = require("./comp.js");
+const ch = require("./coph.js");
 
 const viaHeaders = [
     '1.1 example-proxy-service.com (ExampleProxy/1.0)',
@@ -30,16 +29,16 @@ async function abaa(req, res) {
   req.params.url = decodeURIComponent(url);
   req.params.webp = !req.query.jpeg
   req.params.grayscale = req.query.bw != 0
-  req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+  req.params.quality = parseInt(req.query.l, 10) || 40
 
         const randomIP = generateRandomIP();
     const userAgent = randomUserAgent();
 
 
     
-    let origin = await undici.request(req.params.url, {
+    let origin = await utr.request(req.params.url, {
     headers: {
-                ...lodash.pick(request.headers, ['cookie', 'dnt', 'referer']),
+                ...pick(req.headers, ['cookie', 'dnt', 'referer']),
                 'user-agent': userAgent,
                 'x-forwarded-for': randomIP,
                 'via': randomVia(),
@@ -54,21 +53,20 @@ async function abaa(req, res) {
 
 function _onRequestError(req, res, err) {
 
-  if (err.code === "ERR_INVALID_URL") return res.status(400).send("Invalid URL");
+  if (err.code === "ERR_INVALID_URL") return res.status(400).send("");
 
-  redirect(req, res);
-  console.error(err);
+  rd(req, res);
 }
 
 function _onRequestResponse(origin, req, res) {
   if (origin.statusCode >= 400)
-    return redirect(req, res);
+    return rd(req, res);
 
 
   if (origin.statusCode >= 300 && origin.headers.location)
-    return redirect(req, res);
+    return rd(req, res);
 
-  copyHeaders(origin, res);
+  ch(origin, res);
   res.setHeader("content-encoding", "identity");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -78,9 +76,9 @@ function _onRequestResponse(origin, req, res) {
 
   origin.body.on('error', _ => req.socket.destroy());
 
-  if (shouldCompress(req)) {
+  if (sc(req)) {
    
-    return compress(req, res, origin);
+    return c(req, res, origin);
   } else {
    
 

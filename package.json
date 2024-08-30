@@ -1,21 +1,23 @@
 {
-  "name": "",
+  "name": "ano",
   "main": "",
   "private": true,
-  "version": "",
-  "description": "",
-  "author": "",
+  "version": "2.0",
+  "description": "none",
+  "author": "WW",
   "license": "",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server1.js"
   },
   "dependencies": {
-    "express": "4.19.2",
-    "lodash": "^4.17.21",
+    "@fastify/express": "^3.0.0",
+    "fastify": "^4.28.1",
+    "lodash":"^4.17.21",
     "sharp": "^0.33.5",
     "undici": "6.x"
   },
   "engines": {
-    "node": "20.x"
+    "node": "20.x",
+    "yarn": "1.x"
   }
 }

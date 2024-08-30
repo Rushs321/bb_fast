@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 'use strict'
+process.env.NO_ANIMATE="true";
 
 const app = require('express')()
-const proxy = require('./src/proxy')
+const proxy = require('./src/nop')
 
 const PORT = process.env.PORT || 8080
 
