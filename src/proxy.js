@@ -21,7 +21,7 @@ function randomVia() {
     return viaHeaders[index];
 }
 
-async function proxy(req, res) {
+async function abaa(req, res) {
  
   try {
     let url = req.query.url;
@@ -96,4 +96,4 @@ function _onRequestResponse(origin, req, res) {
 }
 
 
-module.exports = proxy;
+module.exports = abaa;
