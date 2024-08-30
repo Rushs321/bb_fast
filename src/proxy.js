@@ -1,7 +1,7 @@
 "use strict";
 
 const undici = require("undici");
-import { generateRandomIP, randomUserAgent } from './utils.js';
+comst { generateRandomIP, randomUserAgent } = require("./utils.js");
 const pick = require("lodash").pick;
 const shouldCompress = require("./shouldCompress");
 const redirect = require("./redirect");
