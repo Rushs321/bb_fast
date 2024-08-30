@@ -16,6 +16,6 @@
     "undici": "6.x"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": "20"
   }
 }
