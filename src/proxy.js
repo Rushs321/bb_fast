@@ -1,32 +1,48 @@
 "use strict";
-/*
- * proxy.js
- * The bandwidth hero proxy handler.
- * proxy(httpRequest, httpResponse);
- */
+
 const undici = require("undici");
+import { generateRandomIP, randomUserAgent } from './utils.js';
 const pick = require("lodash").pick;
 const shouldCompress = require("./shouldCompress");
 const redirect = require("./redirect");
 const compress = require("./compress");
 const copyHeaders = require("./copyHeaders");
+const DEFAULT_QUALITY = 40;
+
+const viaHeaders = [
+    '1.1 example-proxy-service.com (ExampleProxy/1.0)',
+    '1.0 another-proxy.net (Proxy/2.0)',
+    '1.1 different-proxy-system.org (DifferentProxy/3.1)',
+    '1.1 some-proxy.com (GenericProxy/4.0)',
+];
+
+function randomVia() {
+    const index = Math.floor(Math.random() * viaHeaders.length);
+    return viaHeaders[index];
+}
 
 async function proxy(req, res) {
-  /*
-   * Avoid loopback that could causing server hang.
-   */
-  if (
-    req.headers["via"] == "1.1 bandwidth-hero" &&
-    ["127.0.0.1", "::1"].includes(req.headers["x-forwarded-for"] || req.ip)
-  )
-    return redirect(req, res);
+ 
   try {
+    let url = req.query.url;
+  if (!url) return res.send('bandwidth-hero-proxy');
+
+  req.params.url = decodeURIComponent(url);
+  req.params.webp = !req.query.jpeg
+  req.params.grayscale = req.query.bw != 0
+  req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+
+        const randomIP = generateRandomIP();
+    const userAgent = randomUserAgent();
+
+
+    
     let origin = await undici.request(req.params.url, {
-      headers: {
-        ...pick(req.headers, ["cookie", "dnt", "referer", "range"]),
-        "user-agent": "Bandwidth-Hero Compressor",
-        "x-forwarded-for": req.headers["x-forwarded-for"] || req.ip,
-        via: "1.1 bandwidth-hero",
+    headers: {
+                ...lodash.pick(request.headers, ['cookie', 'dnt', 'referer']),
+                'user-agent': userAgent,
+                'x-forwarded-for': randomIP,
+                'via': randomVia(),
       },
       maxRedirections: 4
     });
@@ -37,12 +53,9 @@ async function proxy(req, res) {
 }
 
 function _onRequestError(req, res, err) {
-  // Ignore invalid URL.
+
   if (err.code === "ERR_INVALID_URL") return res.status(400).send("Invalid URL");
 
-  /*
-   * When there's a real error, Redirect then destroy the stream immediately.
-   */
   redirect(req, res);
   console.error(err);
 }
@@ -51,7 +64,7 @@ function _onRequestResponse(origin, req, res) {
   if (origin.statusCode >= 400)
     return redirect(req, res);
 
-  // handle redirects
+
   if (origin.statusCode >= 300 && origin.headers.location)
     return redirect(req, res);
 
@@ -66,15 +79,10 @@ function _onRequestResponse(origin, req, res) {
   origin.body.on('error', _ => req.socket.destroy());
 
   if (shouldCompress(req)) {
-    /*
-     * sharp support stream. So pipe it.
-     */
+   
     return compress(req, res, origin);
   } else {
-    /*
-     * Downloading then uploading the buffer to the client is not a good idea though,
-     * It would better if you pipe the incomming buffer to client directly.
-     */
+   
 
     res.setHeader("x-proxy-bypass", 1);
 
