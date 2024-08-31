@@ -10,7 +10,7 @@ const fastify = require('fastify')({
   const express = require('@fastify/express');
   const proxy = require('./src/nop');
   
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 8080;
   
   async function start() {
     // Register the express plugin
